@@ -26,10 +26,13 @@ protected:
 
 private:
 	float PlayerReach = 100.f;
+
+	UPROPERTY()
 	UPhysicsHandleComponent *PhysicsHandle = nullptr;
+	UPROPERTY()
 	UInputComponent *InputComponent = nullptr;
 
-	void SetPhysicsHandle();
+	void FindPhysicsHandle();
 	void SetInputComponent();
 
 	void Grab();

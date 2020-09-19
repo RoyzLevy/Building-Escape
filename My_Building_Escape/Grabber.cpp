@@ -15,17 +15,13 @@ UGrabber::UGrabber()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-void UGrabber::SetPhysicsHandle()
+void UGrabber::FindPhysicsHandle()
 {
 	// Check for physics handle component
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>(); // find the component.
 	if (!PhysicsHandle)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Physics handle component on %s"), *GetOwner()->GetName());
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Grabber player ready"));
 	}
 }
 
@@ -50,7 +46,7 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetPhysicsHandle();
+	FindPhysicsHandle();
 	SetInputComponent();
 }
 
@@ -64,9 +60,13 @@ void UGrabber::Grab()
 	FHitResult HitResult = GetFirstPhysicsBodyInReach();
 	// if there is, attach the physics handle
 	UPrimitiveComponent *ComponentToGrab = HitResult.GetComponent();
-	if (HitResult.GetActor())
+	AActor *ActorHit = HitResult.GetActor();
+	if (ActorHit)
 	{
-		PhysicsHandle->GrabComponentAtLocation(ComponentToGrab, NAME_None, LineTraceEnd);
+		if (PhysicsHandle)
+		{
+			PhysicsHandle->GrabComponentAtLocation(ComponentToGrab, NAME_None, LineTraceEnd);
+		}
 	}
 }
 
@@ -75,7 +75,7 @@ void UGrabber::Release()
 	UE_LOG(LogTemp, Warning, TEXT("Release!"));
 
 	// release the physics handle.
-	if (PhysicsHandle->GetGrabbedComponent())
+	if (PhysicsHandle && PhysicsHandle->GetGrabbedComponent())
 	{
 		PhysicsHandle->ReleaseComponent();
 	}
@@ -87,7 +87,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// if physics handle attached, move holded object.
-	if (PhysicsHandle->GrabbedComponent)
+	if (PhysicsHandle && PhysicsHandle->GrabbedComponent)
 	{
 		PhysicsHandle->SetTargetLocation(GetLineTraceEnd());
 	}
